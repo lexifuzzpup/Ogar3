@@ -1,28 +1,43 @@
 {
-  "name": "Ogar3",
-  "version": "1.0.0",
-  "description": "Open source Agar.io server",
-  "main": "index.js",
-  "dependencies": {
-    "burrow": "0.0.0",
-    "finalhandler": "^0.3.6",
-    "serve-static": "^1.9.3",
-    "ws": "^0.7.2"
-  },
-  "scripts": {
-    "start": "node index.js",
-    "build": "docker build -t ogar3 --network=host .",
-    "start-docker": "docker run --rm --network=host -it ogar3",
-    "dev": "npm run build ; npm run start-docker"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Faris90/Ogar3"
-  },
-  "author": "Faris90",
-  "license": "Apache License 2.0",
-  "bugs": {
-    "url": "https://github.com/Faris90/Ogar3/issues"
-  },
-  "homepage": "https://github.com/Faris90/Ogar3"
+    "name": "Ogar3",
+    "version": "1.0.0",
+    "description": "Open source Agar.io server",
+    "type": "module",
+    "main": "dist/index.js",
+    "dependencies": {
+        "finalhandler": "^1.3.1",
+        "serve-static": "^1.16.2",
+        "ws": "^8.18.0"
+    },
+    "devDependencies": {
+        "@types/finalhandler": "^1.2.4",
+        "@types/node": "^22.10.0",
+        "@types/serve-static": "^1.15.7",
+        "@types/ws": "^8.5.13",
+        "concurrently": "^9.1.0",
+        "tsx": "^4.19.2",
+        "typescript": "^5.7.2",
+        "vite": "^6.0.3"
+    },
+    "scripts": {
+        "build:server": "tsc -p tsconfig.json",
+        "build:client": "vite build --config client/vite.config.ts",
+        "build": "npm run build:server && npm run build:client",
+        "start": "node dist/index.js",
+        "dev:server": "tsx watch src/index.ts",
+        "dev:client": "vite --config client/vite.config.ts",
+        "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
+        "docker:build": "docker build -t ogar3 --network=host .",
+        "docker:run": "docker run --rm --network=host -it ogar3"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Faris90/Ogar3"
+    },
+    "author": "Faris90",
+    "license": "Apache License 2.0",
+    "bugs": {
+        "url": "https://github.com/Faris90/Ogar3/issues"
+    },
+    "homepage": "https://github.com/Faris90/Ogar3"
 }

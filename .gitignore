@@ -1,2 +1,5 @@
 logs/
 node_modules/
+dist/
+client/dist/
+client/api
