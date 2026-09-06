@@ -11,7 +11,9 @@
   },
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "docker build -t ogar3 --network=host .",
+    "start-docker": "docker run --rm --network=host -it ogar3",
+    "dev": "npm run build ; npm run start-docker"
   },
   "repository": {
     "type": "git",
