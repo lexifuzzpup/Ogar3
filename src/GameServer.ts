@@ -1,5 +1,5 @@
 import { createServer, type Server as HttpServer, type IncomingMessage } from "node:http";
-import { readFileSync, writeFileSync, renameSync, appendFileSync } from "node:fs";
+import { readFileSync, writeFileSync, renameSync, appendFileSync, mkdirSync } from "node:fs";
 import finalhandler from "finalhandler";
 import serveStatic from "serve-static";
 import { WebSocket, WebSocketServer } from "ws";
@@ -162,6 +162,12 @@ export class GameServer {
     }
 
     start(): void {
+        // `logs/` holds only generated files, so it isn't checked into the repo (see
+        // .gitignore) - create it on demand rather than assuming a prior checkout or deploy
+        // step already provisioned it (PacketHandler's chat log and PlayerTracker's stats log
+        // both write here).
+        mkdirSync("./logs", { recursive: true });
+
         // Logging
         this.log.setup(this);
 
@@ -805,6 +811,10 @@ export class GameServer {
     }
 
     MasterPing(): void {
+        // `client/api/` holds only this generated file, so it isn't checked into the repo
+        // (see .gitignore) - create it on demand rather than assuming a prior checkout or
+        // deploy step already provisioned it.
+        mkdirSync("./client/api", { recursive: true });
         try {
             renameSync("./client/api/stats.txt", "./client/api/stats.txt.bak");
             appendFileSync("./client/api/stats.txt", String(this.stats));
