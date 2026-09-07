@@ -1,0 +1,20 @@
+FROM node:22-alpine AS build
+
+WORKDIR /usr/src/app
+COPY package.json package-lock.json tsconfig.json ./
+RUN npm install
+COPY src ./src
+RUN npm run build:server
+
+FROM node:22-alpine
+
+WORKDIR /usr/src/app
+ENV NODE_ENV=production
+COPY package.json package-lock.json ./
+RUN npm install --omit=dev && npm cache clean --force
+COPY --from=build /usr/src/app/dist ./dist
+COPY gameserver.ini ./
+
+CMD [ "node", "dist/index.js" ]
+
+EXPOSE 8080

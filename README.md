@@ -39,4 +39,37 @@ Please note that on some systems, you may have to run the process as root or oth
 ## Configuring Ogar3
 Use gameserver.ini in the repository root to modify Ogar3's configuration fields.
 
+## Running with Docker
+`npm run docker:build` / `npm run docker:run` build and run a single image containing both the
+game server and the built client (matching `npm start`).
+
+To run the server and client as separate containers instead, use Docker Compose:
+
+```sh
+~$ npm run docker:up
+```
+
+This builds `Dockerfile.server` (the game server, listening on port 8080) and
+`Dockerfile.client` (an nginx container serving the built client on port 80, proxying `/ws` to
+the server container so the default single-server setup works with no extra configuration).
+`npm run docker:down` stops them.
+
+`gameserver.ini` is bind-mounted into the server container, so it can be edited on the host
+without rebuilding the image.
+
+## Connecting to multiple servers
+The client can offer players a dropdown of servers to connect to, instead of always connecting
+to its own origin. List them in `client/public/servers.json` (bind-mounted into the client
+container by `docker-compose.yml`, so it can be edited without rebuilding), in this format:
+
+```json
+[
+    { "name": "FFA", "address": "wss://ffa.ogar.xyz:443" },
+    { "name": "Teams", "address": "wss://teams.ogar.xyz:443" }
+]
+```
+
+Leave it as `[]` (the default) for a single-server deployment - the picker stays hidden and the
+client connects to its own origin, as before.
+
 

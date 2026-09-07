@@ -16,17 +16,23 @@ interface ChatEntry {
     time: number;
 }
 
+export interface ServerEntry {
+    name: string;
+    address: string;
+}
+
 // The client "god object": replaces main_out.js's IIFE-closure state (~50 top-level `var`s)
 // and the `wHandle.*`/implicit globals it exported, so the DOM can be wired up (see main.ts)
 // without any of that state or these handlers needing to live on `window`.
 export class GameClient {
+    // Bare `host` used for the default same-origin connection (no servers.json configured, or
+    // no entry picked yet) - kept separate from `serverAddress` below because it has no
+    // explicit protocol and must be combined with `useHttps`.
     private connectionUrl: string;
+    // Full "ws://"/"wss://" address picked from servers.json (see loadServerList/setserver);
+    // null means "use connectionUrl + useHttps instead".
+    private serverAddress: string | null = null;
     private readonly skinUrl = `${import.meta.env.BASE_URL}skins/`;
-    // The game server's WebSocketServer has no `path` restriction, so it accepts a connection
-    // on any path - using a fixed one (rather than the bare origin) lets Vite's dev server
-    // proxy WS traffic through to the separately-running game server (see vite.config.ts),
-    // since in dev the page itself is served from Vite's own port, not the game server's.
-    private readonly wsPath = "/ws";
 
     private touchable = "createTouch" in document;
     private touches: TouchList | [] = [];
@@ -130,8 +136,8 @@ export class GameClient {
     // event handlers; now wired up from main.ts via addEventListener instead.
 
     setserver = (arg: string): void => {
-        if(arg != this.connectionUrl) {
-            this.connectionUrl = arg;
+        if(arg != this.serverAddress) {
+            this.serverAddress = arg;
             this.showConnecting();
         }
     };
@@ -508,7 +514,7 @@ export class GameClient {
             }
             this.ws = null;
         }
-        const wsUrl = (this.useHttps ? "wss://" : "ws://") + this.connectionUrl + this.wsPath;
+        const wsUrl = this.serverAddress ?? ((this.useHttps ? "wss://" : "ws://") + this.connectionUrl);
         this.nodesOnScreen = [];
         this.playerCells = [];
         this.nodes = {};
@@ -1233,6 +1239,17 @@ export class GameClient {
         }).catch(() => {
             // No skin list available - not fatal, skins simply won't resolve by name.
         });
+    }
+
+    // Server administrator-provided list of connectable servers (see servers.json). Returns
+    // the parsed list so main.ts can build the server-picker dropdown; empty/missing means
+    // "single-server deployment", so the caller should leave the picker hidden and the client
+    // keeps connecting to its own origin.
+    loadServerList(): Promise<ServerEntry[]> {
+        return fetch(`${import.meta.env.BASE_URL}servers.json`)
+            .then((resp) => resp.json() as Promise<unknown>)
+            .then((data) => Array.isArray(data) ? data as ServerEntry[] : [])
+            .catch(() => []);
     }
 
     get SKIN_URL(): string {

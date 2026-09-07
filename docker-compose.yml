@@ -1,0 +1,27 @@
+services:
+    server:
+        build:
+            context: .
+            dockerfile: Dockerfile.server
+            network: host
+        ports:
+            - "8080:8080"
+        volumes:
+            - ./gameserver.ini:/usr/src/app/gameserver.ini
+            - ./logs:/usr/src/app/logs
+        stdin_open: true
+        tty: true
+        restart: unless-stopped
+
+    client:
+        build:
+            context: .
+            dockerfile: Dockerfile.client
+            network: host
+        ports:
+            - "80:80"
+        volumes:
+            - ./client/public/servers.json:/usr/share/nginx/html/servers.json:ro
+        depends_on:
+            - server
+        restart: unless-stopped

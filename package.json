@@ -28,7 +28,9 @@
         "dev:client": "vite --config client/vite.config.ts",
         "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
         "docker:build": "docker build -t ogar3 --network=host .",
-        "docker:run": "docker run --rm --network=host -it ogar3"
+        "docker:run": "docker run --rm --network=host -it ogar3",
+        "docker:up": "docker compose up --build",
+        "docker:down": "docker compose down"
     },
     "repository": {
         "type": "git",

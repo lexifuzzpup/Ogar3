@@ -2,6 +2,29 @@ import { GameClient } from "./GameClient.js";
 
 const client = new GameClient();
 
+const serverPicker = document.getElementById("server-picker")!;
+const serverSelect = document.getElementById("server-select") as HTMLSelectElement;
+
+// Populate the server picker from servers.json, the server administrator's list of
+// connectable servers (see README) - a missing file or an empty list means a single-server
+// deployment, so the picker stays hidden and the client keeps connecting to its own origin.
+client.loadServerList().then((servers) => {
+    if(servers.length === 0) {
+        return;
+    }
+    for(const server of servers) {
+        const option = document.createElement("option");
+        option.value = server.address;
+        option.textContent = server.name;
+        serverSelect.appendChild(option);
+    }
+    serverSelect.addEventListener("change", () => {
+        client.setserver(serverSelect.value);
+    });
+    client.setserver(serverSelect.value);
+    serverPicker.style.display = "block";
+});
+
 const nickInput = document.getElementById("nick") as HTMLInputElement;
 const playBtn = document.getElementById("play-btn")!;
 const settingsBtn = document.getElementById("settings-btn")!;
